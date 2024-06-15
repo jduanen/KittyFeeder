@@ -2,6 +2,8 @@
 #include <Stepper.h>
 
 
+#define TAG   "FEEDER_DOOR"
+
 // ULN2003 Motor Driver Pins
 #define IN1  7   // GPIO7 D5
 #define IN2  8   // GPIO8 D8
@@ -16,11 +18,14 @@
 #define MAX_MOVE_STEPS  (STEPS_PER_REV * 3)  // tune this value
 #define MOVE_STEPS      128  // tune this value
 
+#define CMD_PIN   3 // GPIO3 D1
+
 
 typedef enum {
   CLOSING_DOOR,
   OPENING_DOOR,
-  STOP_DOOR
+  STOP_DOOR,
+  ERROR_DOOR
 } doorStates;
 
 
@@ -39,7 +44,7 @@ bool isOpen() {
   return !digitalRead(OPEN_SENSOR_PIN);
 }
 
-bool close() {
+bool closeDoor() {
   int numSteps = 0;
 
   while (!isClosed()) {
@@ -52,7 +57,7 @@ bool close() {
   return 0;
 }
 
-bool open() {
+bool openDoor() {
   int numSteps = 0;
 
   while (!isOpen()) {
@@ -70,6 +75,8 @@ void setup() {
   while (!Serial) { ; };
   Serial.println("BEGIN");
 
+  pinMode(CMD_PIN, INPUT_PULLUP); //// TMP TMP TMP
+
   pinMode(OPEN_SENSOR_PIN, INPUT_PULLUP);
   pinMode(CLOSED_SENSOR_PIN, INPUT_PULLUP);
   delay(1000);
@@ -81,10 +88,38 @@ void setup() {
 }
 
 void loop() {
-  if (isOpen()) {
-    Serial.println("Open");
-  } else
-  if (isClosed()) {
-    Serial.println("Closed");
+  //// TMP TMP TMP
+  if (!digitalRead(CMD_PIN)) {
+    if (isOpen()) {
+      state = CLOSING_DOOR;
+      Serial.println("CLOSE");
+    } else
+    if (isClosed()) {
+      state = OPENING_DOOR;
+      Serial.println("OPEN");
+    } else {
+      ////Serial.println("NOP");
+    }
+  }
+
+  switch (state) {
+    case CLOSING_DOOR:
+      if (closeDoor()) {
+        ESP_LOGE(TAG, "Failed to sense door closed");
+        state = ERROR_DOOR;
+      } else {
+        state = STOP_DOOR;
+      }
+      break;
+    case OPENING_DOOR:
+      if (openDoor()) {
+        ESP_LOGE(TAG, "Failed to sense door open");
+        state = ERROR_DOOR;
+      } else {
+        state = STOP_DOOR;
+      }
+      break;
+    default:
+      break;
   }
 }
