@@ -2,9 +2,11 @@
 #include <Stepper.h>
 
 
+#define ESP8266
 #define TAG   "FEEDER_DOOR"
 
 // ULN2003 Motor Driver Pins
+#ifdef ESP32_C3
 #define IN1  7   // GPIO7 D5
 #define IN2  8   // GPIO8 D8
 #define IN3  9   // GPIO9 D9
@@ -13,12 +15,27 @@
 #define OPEN_SENSOR_PIN    5  // GPIO5 D3
 #define CLOSED_SENSOR_PIN  4  // GPIO4 D2
 
+#define CMD_PIN   3  // GPIO3 D1  //// TMP TMP TMP
+#endif // ESP32_C3
+
+#ifdef ESP8266
+#define IN1  15  // GPIO15 D8
+#define IN2  13  // GPIO13 D7
+#define IN3  12  // GPIO12 D6
+#define IN4  14  // GPIO14 D5
+
+#define OPEN_SENSOR_PIN    5  // GPIO5 D1
+#define CLOSED_SENSOR_PIN  4  // GPIO4 D2
+
+#define CMD_PIN   16  // GPIO16 D0  //// TMP TMP TMP
+#endif // ESP8266
+
+
 #define STEPS_PER_REV   2048  // change this to fit the number of steps per revolution
 
 #define MAX_MOVE_STEPS  (STEPS_PER_REV * 3)  // tune this value
 #define MOVE_STEPS      128  // tune this value
 
-#define CMD_PIN   3 // GPIO3 D1
 
 
 typedef enum {
