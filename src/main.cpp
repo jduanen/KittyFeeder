@@ -70,6 +70,13 @@ bool openDoor() {
   return 0;
 }
 
+void stopDoor() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
+
 void setup() {
   Serial.begin(115200);
   while (!Serial) { ; };
@@ -83,7 +90,8 @@ void setup() {
   Serial.print("Open: ");Serial.println(digitalRead(OPEN_SENSOR_PIN));
   Serial.print("Closed: ");Serial.println(digitalRead(OPEN_SENSOR_PIN));
 
-  myStepper.setSpeed(15);  // N.B. 15 is about the fastest possible
+  myStepper.setSpeed(4);  // N.B. 15 is about the fastest possible
+  stopDoor();
   Serial.println("START");
 }
 
@@ -109,6 +117,7 @@ void loop() {
         state = ERROR_DOOR;
       } else {
         state = STOP_DOOR;
+        stopDoor();
       }
       break;
     case OPENING_DOOR:
@@ -117,6 +126,7 @@ void loop() {
         state = ERROR_DOOR;
       } else {
         state = STOP_DOOR;
+        stopDoor();
       }
       break;
     default:
