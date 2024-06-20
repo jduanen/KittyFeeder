@@ -2,14 +2,21 @@
 #include <Stepper.h>
 
 
-#define ESP8266
+#define USE_ESP_IDF_LOG   1
+
+#define LOG_LOCAL_LEVEL   ESP_LOG_DEBUG  // this overrides CONFIG_LOG_MAXIMUM_LEVEL setting in menuconfig
+                                         // and must be defined before including esp_log.h
+#define MY_GLOBAL_DEBUG_LEVEL  ESP_LOG_DEBUG
+#include "esp_log.h"
+
+
 #define TAG   "FEEDER_DOOR"
 
 // ULN2003 Motor Driver Pins
-#ifdef ESP32_C3
-#define IN1  7   // GPIO7 D5
-#define IN2  8   // GPIO8 D8
-#define IN3  9   // GPIO9 D9
+#ifdef ESP32
+#define IN1   7  // GPIO7 D5
+#define IN2   8  // GPIO8 D8
+#define IN3   9  // GPIO9 D9
 #define IN4  10  // GPIO10 D10
 
 #define OPEN_SENSOR_PIN    5  // GPIO5 D3
@@ -28,6 +35,8 @@
 #define CLOSED_SENSOR_PIN  4  // GPIO4 D2
 
 #define CMD_PIN   16  // GPIO16 D0  //// TMP TMP TMP
+
+#define ESP_LOGE(tag, msg)  Serial.print("ERROR: ");Serial.print(tag);Serial.println(msg);
 #endif // ESP8266
 
 
@@ -100,6 +109,10 @@ void setup() {
   Serial.println("BEGIN");
 
   pinMode(CMD_PIN, INPUT_PULLUP); //// TMP TMP TMP
+
+  #ifdef ESP32
+  esp_log_level_set("*", MY_GLOBAL_DEBUG_LEVEL)
+  #endif  // ESP32
 
   pinMode(OPEN_SENSOR_PIN, INPUT_PULLUP);
   pinMode(CLOSED_SENSOR_PIN, INPUT_PULLUP);
